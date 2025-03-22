@@ -1,0 +1,158 @@
+/* Dashboard container */
+.dashboard {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 280px;
+    background: #ffffff;
+    color: #333;
+    transition: all 0.3s ease-in-out;
+    display: flex;
+    flex-direction: column;
+    z-index: 1000;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Closed menu */
+.dashboard.closed {
+    transform: translateX(-100%);
+}
+
+/* Sidebar content */
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 20px;
+}
+
+/* Dashboard Header */
+.dashboard-header {
+    padding-bottom: 20px;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 20px;
+}
+
+.title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 24px;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.logo {
+    font-size: 28px;
+}
+
+/* User Profile Section */
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.avatar {
+    font-size: 32px;
+}
+
+.user-info h3 {
+    font-size: 14px;
+    color: #666;
+    margin: 0;
+}
+
+.user-info p {
+    font-size: 16px;
+    font-weight: bold;
+    margin: 5px 0 0 0;
+    color: #2c3e50;
+}
+
+/* Navigation Buttons */
+.nav-buttons {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.nav-link {
+    text-decoration: none;
+    width: 100%;
+}
+
+.nav-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: transparent;
+    color: #666;
+    border: none;
+    padding: 12px 15px;
+    width: 100%;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 15px;
+    text-align: left;
+}
+
+.nav-icon {
+    font-size: 18px;
+}
+
+.nav-btn:hover {
+    background: #f0f0f0;
+    color: #2c3e50;
+}
+
+.nav-link.active .nav-btn {
+    background: #e3f2fd;
+    color: #1976d2;
+    font-weight: 600;
+}
+
+/* Hamburger button */
+.hamburger {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    font-size: 20px;
+    background: #ffffff;
+    color: #333;
+    border: none;
+    cursor: pointer;
+    padding: 10px;
+    border-radius: 8px;
+    z-index: 1100;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+}
+
+.hamburger:hover {
+    background: #f0f0f0;
+}
+
+/* Sidebar Footer */
+.sidebar-footer {
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+    text-align: center;
+    color: #666;
+    font-size: 14px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .dashboard {
+        width: 250px;
+    }
+}
+  
