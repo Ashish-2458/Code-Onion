@@ -8,12 +8,13 @@ const Dashboard = () => {
 
   const navItems = [
     { path: "/", label: "Dashboard (Main Home)", icon: "🏢" },
-    { path: "/chatbot", label: "Chatbot (AI Assistant)", icon: "🤖" },
+    { path: "/chatbot", label: "Chatbot (AI Assistant)", icon: "🧠" },
     { path: "/sales", label: "Sales & Inventory", icon: "🛍️" },
     { path: "/invoice", label: "Invoice Generator", icon: "📝" },
-    { path: "/purchase", label: "Purchase & Orders", icon: "🛍️" },
     { path: "/finance", label: "Finance & Accounting", icon: "💰" },
     { path: "/hr", label: "HR & Payroll", icon: "👥" },
+    { path: "/allbot", label: "AllBot (Advanced AI)", icon: "🧠" },
+    { path: "/purchase", label: "Purchase & Orders", icon: "🛍️" },
     { path: "/settings", label: "Settings & Admin", icon: "⚙️" },
   ];
 

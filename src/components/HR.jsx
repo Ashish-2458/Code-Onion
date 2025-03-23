@@ -299,40 +299,90 @@ Format the response as JSON with the following structure:
   };
 
   // Download report as PDF
-  const downloadReportAsPDF = () => {
+  const downloadReportAsPDF = async () => {
     if (!reportContainerRef.current || !report) return;
     
-    const pdf = new jsPDF('p', 'pt', 'a4');
-    const reportElement = reportContainerRef.current;
-    
-    // Get width of report container and calculate required scale to fit on PDF
-    const elementWidth = reportElement.offsetWidth;
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const scale = pdfWidth / elementWidth * 0.9; // Use 90% of PDF width
-    
-    html2canvas(reportElement, {
-      scale: 2, // Higher scale for better quality
-      useCORS: true,
-      logging: false
-    }).then(canvas => {
-      const imgData = canvas.toDataURL('image/png');
+    try {
+      // Set a temporary class to prepare for PDF conversion
+      reportContainerRef.current.classList.add('generating-pdf');
       
-      // Calculate height to maintain aspect ratio
-      const imgHeight = canvas.height * scale / canvas.width;
+      // Wait for any pending renders
+      await new Promise(resolve => setTimeout(resolve, 100));
       
-      // Add image to PDF
-      pdf.addImage(
-        imgData, 
-        'PNG', 
-        pdf.internal.pageSize.getWidth() * 0.05, // 5% left margin
-        40, // Top margin
-        pdfWidth * 0.9, // Use 90% of PDF width
-        imgHeight
-      );
+      const pdf = new jsPDF('p', 'pt', 'a4');
+      const reportElement = reportContainerRef.current;
       
-      // Save the PDF
-      pdf.save(`${report.reference_number}_${report.report_title.replace(/\s+/g, '_')}.pdf`);
-    });
+      // Calculate proper scaling
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      
+      const options = {
+        scale: 2, // Higher scale for better quality
+        useCORS: true,
+        allowTaint: true,
+        logging: true, // Enable logging for debugging
+        windowWidth: reportElement.scrollWidth,
+        windowHeight: reportElement.scrollHeight,
+        backgroundColor: '#ffffff'
+      };
+      
+      // First make sure all content is rendered
+      console.log("Starting PDF generation, capturing HTML content...");
+      
+      html2canvas(reportElement, options).then(canvas => {
+        console.log("Canvas captured, dimensions:", canvas.width, "x", canvas.height);
+        
+        // Get the canvas data
+        const imgData = canvas.toDataURL('image/png');
+        
+        // Calculate dimensions to fit the PDF while maintaining aspect ratio
+        const imgWidth = pdfWidth - 40; // 20px margin on each side
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        
+        console.log("Adding image to PDF:", imgWidth, "x", imgHeight);
+        
+        // Add the image to the PDF
+        pdf.addImage(imgData, 'PNG', 20, 20, imgWidth, imgHeight);
+        
+        // Check if content needs multiple pages
+        if (imgHeight > pdfHeight - 40) {
+          console.log("Content requires multiple pages");
+          let heightLeft = imgHeight;
+          let position = 0;
+          
+          // Reset PDF and add first page
+          pdf.addPage();
+          heightLeft -= (pdfHeight - 40);
+          position = -(pdfHeight - 40);
+          
+          // Add more pages as needed
+          while (heightLeft > 0) {
+            position = position - (pdfHeight - 40);
+            pdf.addImage(imgData, 'PNG', 20, position, imgWidth, imgHeight);
+            heightLeft -= (pdfHeight - 40);
+            
+            if (heightLeft > 0) {
+              pdf.addPage();
+            }
+          }
+        }
+        
+        // Remove temporary class
+        reportContainerRef.current.classList.remove('generating-pdf');
+        
+        // Save the PDF
+        console.log("Saving PDF...");
+        pdf.save(`${report.reference_number}_${report.report_title.replace(/\s+/g, '_')}.pdf`);
+      }).catch(error => {
+        console.error("Error generating PDF:", error);
+        alert("There was an error generating the PDF. Please try again.");
+        reportContainerRef.current.classList.remove('generating-pdf');
+      });
+    } catch (error) {
+      console.error("Error in PDF generation:", error);
+      reportContainerRef.current.classList.remove('generating-pdf');
+      alert("There was an error generating the PDF. Please try again.");
+    }
   };
 
   useEffect(() => {

@@ -256,6 +256,59 @@ textarea {
     color: #666;
 }
 
+/* Add styles for the invoice download button and PDF generation */
+.invoice-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 2px solid #eee;
+}
+
+.download-invoice-btn {
+    background: #2ecc71;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.download-invoice-btn::before {
+    content: "📥";
+    font-size: 1.2rem;
+}
+
+.download-invoice-btn:hover {
+    background: #27ae60;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.download-invoice-btn:active {
+    transform: translateY(0);
+}
+
+/* Support for PDF generation */
+.generating-pdf {
+    width: 800px !important;
+    margin: 0 !important;
+    background-color: white !important;
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    z-index: -1 !important;
+    overflow: visible !important;
+    padding: 30px !important;
+    box-shadow: none !important;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .invoice-page {

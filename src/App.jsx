@@ -8,6 +8,7 @@ import HR from "./components/HR";
 import Settings from "./components/Settings";
 import DocsBot from "./components/DocsBot";
 import InvoiceGenerator from "./components/InvoiceGenerator";
+import AllBot from "./components/AllBot";
 import erpData from "./data/erpData.json";
 import "./App.css";
 
@@ -100,6 +101,7 @@ function App() {
                 </div>
               } />
               <Route path="/chatbot" element={<Chatbot />} />
+              <Route path="/allbot" element={<AllBot />} />
               <Route path="/sales" element={<Sales />} />
               <Route path="/invoice" element={<InvoiceGenerator />} />
               <Route path="/purchase" element={<Purchase />} />

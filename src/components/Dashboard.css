@@ -5,7 +5,7 @@
     left: 0;
     height: 100vh;
     width: 280px;
-    background: #ffffff;
+    background: #f0f2f5;
     color: #333;
     transition: all 0.3s ease-in-out;
     display: flex;
@@ -25,13 +25,15 @@
     flex-direction: column;
     height: 100%;
     padding: 20px;
+    overflow-y: auto;
 }
 
 /* Dashboard Header */
 .dashboard-header {
     padding-bottom: 20px;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid #dadce0;
     margin-bottom: 20px;
+    flex-shrink: 0;
 }
 
 .title {
@@ -40,7 +42,7 @@
     gap: 10px;
     font-size: 24px;
     font-weight: bold;
-    color: #2c3e50;
+    color: #4a4a4a;
 }
 
 .logo {
@@ -53,7 +55,7 @@
     align-items: center;
     gap: 15px;
     padding: 15px;
-    background: #f8f9fa;
+    background: #e9ecef;
     border-radius: 10px;
     margin-bottom: 20px;
 }
@@ -72,7 +74,7 @@
     font-size: 16px;
     font-weight: bold;
     margin: 5px 0 0 0;
-    color: #2c3e50;
+    color: #4a4a4a;
 }
 
 /* Navigation Buttons */
@@ -81,6 +83,8 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
+    overflow-y: auto;
+    padding-right: 5px;
 }
 
 .nav-link {
@@ -93,7 +97,7 @@
     align-items: center;
     gap: 12px;
     background: transparent;
-    color: #666;
+    color: #5f6368;
     border: none;
     padding: 12px 15px;
     width: 100%;
@@ -109,14 +113,32 @@
 }
 
 .nav-btn:hover {
-    background: #f0f0f0;
-    color: #2c3e50;
+    background: #e2e4e8;
+    color: #4a4a4a;
 }
 
 .nav-link.active .nav-btn {
-    background: #e3f2fd;
-    color: #1976d2;
+    background: #dadce0;
+    color: #3c4043;
     font-weight: 600;
+}
+
+/* Custom scrollbar styles */
+.nav-buttons::-webkit-scrollbar {
+    width: 6px;
+}
+
+.nav-buttons::-webkit-scrollbar-track {
+    background: #f0f2f5;
+}
+
+.nav-buttons::-webkit-scrollbar-thumb {
+    background: #dadce0;
+    border-radius: 3px;
+}
+
+.nav-buttons::-webkit-scrollbar-thumb:hover {
+    background: #bdc1c6;
 }
 
 /* Hamburger button */
@@ -125,8 +147,8 @@
     top: 20px;
     left: 20px;
     font-size: 20px;
-    background: #ffffff;
-    color: #333;
+    background: #e9ecef;
+    color: #4a4a4a;
     border: none;
     cursor: pointer;
     padding: 10px;
@@ -137,16 +159,17 @@
 }
 
 .hamburger:hover {
-    background: #f0f0f0;
+    background: #dadce0;
 }
 
 /* Sidebar Footer */
 .sidebar-footer {
     padding-top: 20px;
-    border-top: 1px solid #eee;
+    border-top: 1px solid #dadce0;
     text-align: center;
-    color: #666;
+    color: #5f6368;
     font-size: 14px;
+    flex-shrink: 0;
 }
 
 /* Responsive Design */

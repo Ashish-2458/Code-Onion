@@ -700,4 +700,37 @@ textarea {
   .back-btn {
     width: 100%;
   }
+}
+
+/* Add these styles to ensure proper PDF generation */
+.generating-pdf {
+  width: 800px !important;
+  margin: 0 !important;
+  background-color: white !important;
+  position: absolute !important;
+  left: 0 !important;
+  top: 0 !important;
+  z-index: -1 !important;
+  overflow: visible !important;
+  padding: 30px !important;
+  box-shadow: none !important;
+}
+
+.report-container {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+  margin-bottom: 30px;
+  /* These properties ensure content renders properly for PDF */
+  position: relative;
+  overflow: visible;
+}
+
+@media print {
+  .report-container {
+    box-shadow: none;
+    margin: 0;
+    padding: 20px;
+  }
 } 
