@@ -25,20 +25,20 @@ function App() {
             <Routes>
               <Route path="/" element={
                 <div className="welcome-section">
-                  <h1>Welcome to Dashboard</h1>
-                  <p>Your complete business management solution</p>
+                  <h1>Welcome to IDMS ERP System</h1>
+                  <p>Integrated Digital Management Solutions for Your Enterprise</p>
                   <div className="dashboard-stats">
                     <div className="stat-card">
-                      <h3>Total Sales</h3>
-                      <p>$48,250</p>
+                      <h3>Active Users</h3>
+                      <p>248</p>
                     </div>
                     <div className="stat-card">
-                      <h3>Orders</h3>
-                      <p>164</p>
+                      <h3>Total Transactions</h3>
+                      <p>15,647</p>
                     </div>
                     <div className="stat-card">
-                      <h3>Inventory</h3>
-                      <p>1,428</p>
+                      <h3>System Uptime</h3>
+                      <p>99.9%</p>
                     </div>
                   </div>
                 </div>

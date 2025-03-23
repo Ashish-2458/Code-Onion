@@ -7,7 +7,7 @@ const Dashboard = () => {
   const location = useLocation();
 
   const navItems = [
-    { path: "/", label: "Dashboard (Main Home)", icon: "🏠" },
+    { path: "/", label: "Dashboard (Main Home)", icon: "🏢" },
     { path: "/chatbot", label: "Chatbot (AI Assistant)", icon: "🤖" },
     { path: "/sales", label: "Sales & Inventory", icon: "📊" },
     { path: "/purchase", label: "Purchase & Orders", icon: "🛍️" },
@@ -32,8 +32,8 @@ const Dashboard = () => {
         <div className="sidebar">
           <div className="dashboard-header">
             <h2 className="title">
-              <span className="logo">🚀</span>
-              Dashboard
+              <span className="logo">🏢</span>
+              IDMS ERP
             </h2>
           </div>
 
@@ -53,7 +53,7 @@ const Dashboard = () => {
           </nav>
 
           <div className="sidebar-footer">
-            <p>© 2024 Dashboard</p>
+            <p>© 2024 IDMS Enterprise Solutions</p>
           </div>
         </div>
       </div>
