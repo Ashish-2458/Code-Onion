@@ -9,7 +9,8 @@ const Dashboard = () => {
   const navItems = [
     { path: "/", label: "Dashboard (Main Home)", icon: "🏢" },
     { path: "/chatbot", label: "Chatbot (AI Assistant)", icon: "🤖" },
-    { path: "/sales", label: "Sales & Inventory", icon: "📊" },
+    { path: "/sales", label: "Sales & Inventory", icon: "🛍️" },
+    { path: "/invoice", label: "Invoice Generator", icon: "📝" },
     { path: "/purchase", label: "Purchase & Orders", icon: "🛍️" },
     { path: "/finance", label: "Finance & Accounting", icon: "💰" },
     { path: "/hr", label: "HR & Payroll", icon: "👥" },
@@ -33,7 +34,7 @@ const Dashboard = () => {
           <div className="dashboard-header">
             <h2 className="title">
               <span className="logo">🏢</span>
-              IDMS ERP
+              Info Electronics
             </h2>
           </div>
 

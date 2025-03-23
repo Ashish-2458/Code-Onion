@@ -6,6 +6,9 @@ import Purchase from "./components/Purchase";
 import Finance from "./components/Finance";
 import HR from "./components/HR";
 import Settings from "./components/Settings";
+import DocsBot from "./components/DocsBot";
+import InvoiceGenerator from "./components/InvoiceGenerator";
+import erpData from "./data/erpData.json";
 import "./App.css";
 
 function App() {
@@ -16,6 +19,10 @@ function App() {
     </div>
   );
 
+  // Company information from erpData
+  const companyInfo = erpData.Company_Details;
+  const employees = erpData.HR_Payroll.Employees;
+
   return (
     <Router>
       <div className="app-container">
@@ -25,8 +32,57 @@ function App() {
             <Routes>
               <Route path="/" element={
                 <div className="welcome-section">
-                  <h1>Welcome to IDMS ERP System</h1>
+                  <h1>Welcome to {erpData.Company_Name}</h1>
                   <p>Integrated Digital Management Solutions for Your Enterprise</p>
+                  
+                  {/* Company Information Card */}
+                  <div className="info-card company-info">
+                    <h2>Company Information</h2>
+                    <div className="info-grid">
+                      <div className="info-item">
+                        <span className="info-label">Registration:</span>
+                        <span className="info-value">{companyInfo.Registration_No}</span>
+                      </div>
+                      <div className="info-item">
+                        <span className="info-label">GSTIN:</span>
+                        <span className="info-value">{companyInfo.GSTIN}</span>
+                      </div>
+                      <div className="info-item">
+                        <span className="info-label">Address:</span>
+                        <span className="info-value">{companyInfo.Address}</span>
+                      </div>
+                      <div className="info-item">
+                        <span className="info-label">Contact:</span>
+                        <span className="info-value">{companyInfo.Contact}</span>
+                      </div>
+                      <div className="info-item">
+                        <span className="info-label">Email:</span>
+                        <span className="info-value">{companyInfo.Email}</span>
+                      </div>
+                      <div className="info-item">
+                        <span className="info-label">Owner:</span>
+                        <span className="info-value">{companyInfo.Owner}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Employee Information */}
+                  <div className="info-card employee-info">
+                    <h2>Key Team Members</h2>
+                    <div className="employee-list">
+                      {employees.map((employee) => (
+                        <div key={employee.Employee_ID} className="employee-card">
+                          <div className="employee-avatar">👤</div>
+                          <div className="employee-details">
+                            <h3>{employee.Name}</h3>
+                            <p className="employee-title">{employee.Designation}</p>
+                            <p className="employee-dept">{employee.Department}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
                   <div className="dashboard-stats">
                     <div className="stat-card">
                       <h3>Active Users</h3>
@@ -45,6 +101,7 @@ function App() {
               } />
               <Route path="/chatbot" element={<Chatbot />} />
               <Route path="/sales" element={<Sales />} />
+              <Route path="/invoice" element={<InvoiceGenerator />} />
               <Route path="/purchase" element={<Purchase />} />
               <Route path="/finance" element={<Finance />} />
               <Route path="/hr" element={<HR />} />
@@ -58,6 +115,7 @@ function App() {
             </Routes>
           </div>
         </div>
+        <DocsBot />
       </div>
     </Router>
   );
