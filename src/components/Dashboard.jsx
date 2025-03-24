@@ -6,15 +6,24 @@ const Dashboard = () => {
   const [isOpen, setIsOpen] = useState(true);
   const location = useLocation();
 
-  const navItems = [
-    { path: "/", label: "Dashboard (Main Home)", icon: "🏢" },
-    { path: "/chatbot", label: "Chatbot (AI Assistant)", icon: "🧠" },
-    { path: "/sales", label: "Sales & Inventory", icon: "🛍️" },
+  // Group navigation items by category
+  const mainNavItems = [
+    { path: "/", label: "Dashboard", icon: "🏠" },
+    { path: "/sales", label: "Sales & Inventory", icon: "📊" },
     { path: "/invoice", label: "Invoice Generator", icon: "📝" },
     { path: "/finance", label: "Finance & Accounting", icon: "💰" },
     { path: "/hr", label: "HR & Payroll", icon: "👥" },
+    { path: "/purchase", label: "Purchase Orders", icon: "🛒" },
+  ];
+
+  const aiNavItems = [
+    { path: "/chatbot", label: "Chatbot", icon: "🗨️" },
+    { path: "/aiinternalbot", label: "AI ERP Assistant", icon: "🤖", badge: "New" },
     { path: "/allbot", label: "AllBot (Advanced AI)", icon: "🧠" },
-    { path: "/purchase", label: "Purchase & Orders", icon: "🛍️" },
+    { path: "/connect", label: "Connect", icon: "📲", badge: "New" },
+  ];
+
+  const otherNavItems = [
     { path: "/settings", label: "Settings & Admin", icon: "⚙️" },
   ];
 
@@ -39,8 +48,18 @@ const Dashboard = () => {
             </h2>
           </div>
 
+          {/* User Profile Section */}
+          <div className="user-profile">
+            <div className="avatar">👤</div>
+            <div className="user-info">
+              <h3>Administrator</h3>
+              <p>Ashish Maurya</p>
+            </div>
+          </div>
+
           <nav className="nav-buttons">
-            {navItems.map((item) => (
+            <div className="nav-section-title">Main Navigation</div>
+            {mainNavItems.map((item) => (
               <Link 
                 key={item.path} 
                 to={item.path} 
@@ -49,6 +68,41 @@ const Dashboard = () => {
                 <button className="nav-btn">
                   <span className="nav-icon">{item.icon}</span>
                   {item.label}
+                  {item.badge && <span className="badge">{item.badge}</span>}
+                </button>
+              </Link>
+            ))}
+
+            <div className="nav-divider"></div>
+            
+            <div className="nav-section-title">AI Assistants</div>
+            {aiNavItems.map((item) => (
+              <Link 
+                key={item.path} 
+                to={item.path} 
+                className={`nav-link ${location.pathname === item.path ? 'active' : ''}`}
+              >
+                <button className="nav-btn">
+                  <span className="nav-icon">{item.icon}</span>
+                  {item.label}
+                  {item.badge && <span className="badge">{item.badge}</span>}
+                </button>
+              </Link>
+            ))}
+
+            <div className="nav-divider"></div>
+            
+            <div className="nav-section-title">System</div>
+            {otherNavItems.map((item) => (
+              <Link 
+                key={item.path} 
+                to={item.path} 
+                className={`nav-link ${location.pathname === item.path ? 'active' : ''}`}
+              >
+                <button className="nav-btn">
+                  <span className="nav-icon">{item.icon}</span>
+                  {item.label}
+                  {item.badge && <span className="badge">{item.badge}</span>}
                 </button>
               </Link>
             ))}

@@ -9,6 +9,8 @@ import Settings from "./components/Settings";
 import DocsBot from "./components/DocsBot";
 import InvoiceGenerator from "./components/InvoiceGenerator";
 import AllBot from "./components/AllBot";
+import AiInternalBot from "./components/AiInternalBot";
+import Connect from "./components/Connect";
 import erpData from "./data/erpData.json";
 import "./App.css";
 
@@ -102,11 +104,13 @@ function App() {
               } />
               <Route path="/chatbot" element={<Chatbot />} />
               <Route path="/allbot" element={<AllBot />} />
+              <Route path="/aiinternalbot" element={<AiInternalBot />} />
               <Route path="/sales" element={<Sales />} />
               <Route path="/invoice" element={<InvoiceGenerator />} />
               <Route path="/purchase" element={<Purchase />} />
               <Route path="/finance" element={<Finance />} />
               <Route path="/hr" element={<HR />} />
+              <Route path="/connect" element={<Connect />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="*" element={
                 <div className="not-found">

@@ -13,7 +13,7 @@ import {
     ArcElement
 } from 'chart.js';
 import { Line, Bar, Doughnut } from 'react-chartjs-2';
-import erpData from '../data/erpData.json';
+import erpData2finance from '../data/erpData2finance.json';
 import './Finance.css';
 
 // Register ChartJS components
@@ -51,55 +51,39 @@ const Finance = () => {
     }, []);
 
     const calculateMetrics = () => {
-        // Calculate total revenue
-        const totalRevenue = erpData.Sales_Inventory.Sales_Transactions.reduce(
-            (sum, sale) => sum + sale.Net_Amount,
-            0
-        );
-
-        // Calculate total expenses (example calculation)
-        const totalExpenses = erpData.HR_Payroll.Employees.reduce(
-            (sum, emp) => sum + emp.Net_Salary,
-            0
-        );
-
-        // Calculate profit
-        const profit = totalRevenue - totalExpenses;
-
-        // Calculate current balance (example)
-        const currentBalance = profit * 0.7; // Assuming 30% goes to other expenses
-
+        const { financial_metrics } = erpData2finance;
+        
         setMetrics({
             revenue: {
-                value: totalRevenue,
-                change: +12.5,
-                trend: 'up'
+                value: financial_metrics.revenue.current_month.total,
+                change: ((financial_metrics.revenue.yearly.projected - financial_metrics.revenue.yearly.achieved) / financial_metrics.revenue.yearly.achieved * 100).toFixed(1),
+                trend: financial_metrics.revenue.yearly.projected > financial_metrics.revenue.yearly.achieved ? 'up' : 'down'
             },
             expenses: {
-                value: totalExpenses,
-                change: -3.2,
-                trend: 'down'
+                value: financial_metrics.expenses.current_month.total,
+                change: ((financial_metrics.expenses.yearly.projected - financial_metrics.expenses.yearly.spent) / financial_metrics.expenses.yearly.spent * 100).toFixed(1),
+                trend: financial_metrics.expenses.yearly.projected < financial_metrics.expenses.yearly.spent ? 'up' : 'down'
             },
             profit: {
-                value: profit,
-                change: +15.8,
-                trend: 'up'
+                value: financial_metrics.profit.current_month.net_profit,
+                change: ((financial_metrics.profit.yearly.projected - financial_metrics.profit.yearly.achieved) / financial_metrics.profit.yearly.achieved * 100).toFixed(1),
+                trend: financial_metrics.profit.yearly.projected > financial_metrics.profit.yearly.achieved ? 'up' : 'down'
             },
             balance: {
-                value: currentBalance,
-                change: +8.4,
-                trend: 'up'
+                value: financial_metrics.cash_flow.current_balance,
+                change: ((financial_metrics.cash_flow.accounts_receivable - financial_metrics.cash_flow.accounts_payable) / financial_metrics.cash_flow.accounts_payable * 100).toFixed(1),
+                trend: financial_metrics.cash_flow.accounts_receivable > financial_metrics.cash_flow.accounts_payable ? 'up' : 'down'
             }
         });
     };
 
     const generateChartData = () => {
-        // Generate revenue data
+        // Generate revenue data from forecasts
         const revenueByMonth = {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            labels: erpData2finance.forecasts.revenue.map(item => item.month),
             datasets: [{
                 label: 'Revenue',
-                data: [65000, 72000, 68000, 85000, 91000, 89000],
+                data: erpData2finance.forecasts.revenue.map(item => item.amount),
                 borderColor: '#2ecc71',
                 backgroundColor: 'rgba(46, 204, 113, 0.1)',
                 fill: true,
@@ -108,12 +92,12 @@ const Finance = () => {
         };
         setRevenueData(revenueByMonth);
 
-        // Generate expense data
+        // Generate expense data from expense categories
         const expenseCategories = {
-            labels: ['Salaries', 'Operations', 'Marketing', 'Equipment', 'Others'],
+            labels: erpData2finance.expense_categories.operational.map(item => item.category),
             datasets: [{
                 label: 'Expenses by Category',
-                data: [45000, 28000, 15000, 12000, 8000],
+                data: erpData2finance.expense_categories.operational.map(item => item.amount),
                 backgroundColor: [
                     'rgba(231, 76, 60, 0.8)',
                     'rgba(241, 196, 15, 0.8)',
@@ -125,85 +109,89 @@ const Finance = () => {
         };
         setExpenseData(expenseCategories);
 
-        // Generate cashflow data
+        // Generate cashflow data from monthly trends
         const cashflowByMonth = {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-            datasets: [{
-                label: 'Income',
-                data: [65000, 72000, 68000, 85000, 91000, 89000],
-                backgroundColor: 'rgba(46, 204, 113, 0.8)'
-            }, {
-                label: 'Expenses',
-                data: [45000, 48000, 51000, 53000, 49000, 52000],
-                backgroundColor: 'rgba(231, 76, 60, 0.8)'
-            }]
+            labels: erpData2finance.monthly_trends.revenue.map(item => item.month),
+            datasets: [
+                {
+                    label: 'Income',
+                    data: erpData2finance.monthly_trends.revenue.map(item => item.amount),
+                    backgroundColor: 'rgba(46, 204, 113, 0.8)'
+                },
+                {
+                    label: 'Expenses',
+                    data: erpData2finance.monthly_trends.expenses.map(item => item.amount),
+                    backgroundColor: 'rgba(231, 76, 60, 0.8)'
+                }
+            ]
         };
         setCashflowData(cashflowByMonth);
     };
 
     const processTransactions = () => {
-        // Process sales transactions
-        const salesTransactions = erpData.Sales_Inventory.Sales_Transactions.map(sale => ({
-            id: sale.Transaction_ID,
-            date: sale.Date,
-            type: 'Income',
-            description: `Sale - Invoice #${sale.Invoice_Number}`,
-            amount: sale.Net_Amount,
-            status: 'completed'
-        }));
-
-        // Process salary transactions
-        const salaryTransactions = erpData.HR_Payroll.Employees.map(emp => ({
-            id: `SAL-${emp.Employee_ID}`,
-            date: new Date().toISOString().split('T')[0], // Current date for example
-            type: 'Expense',
-            description: `Salary - ${emp.Name}`,
-            amount: -emp.Net_Salary,
-            status: 'pending'
-        }));
-
-        // Combine and sort transactions
-        const allTransactions = [...salesTransactions, ...salaryTransactions]
-            .sort((a, b) => new Date(b.date) - new Date(a.date));
+        const { recent_transactions } = erpData2finance;
+        
+        // Combine income and expenses
+        const allTransactions = [
+            ...recent_transactions.income.map(tx => ({
+                ...tx,
+                amount: tx.amount // Keep positive for income
+            })),
+            ...recent_transactions.expenses.map(tx => ({
+                ...tx,
+                amount: -tx.amount // Make negative for expenses
+            }))
+        ].sort((a, b) => new Date(b.date) - new Date(a.date));
 
         setTransactions(allTransactions);
     };
 
     const generateInsights = async () => {
         try {
+            const { financial_metrics, financial_ratios, forecasts } = erpData2finance;
+            
             const prompt = `Analyze this financial data and provide comprehensive business insights:
-            Revenue: ${metrics?.revenue.value}
-            Revenue Change: ${metrics?.revenue.change}%
-            Expenses: ${metrics?.expenses.value}
-            Expense Change: ${metrics?.expenses.change}%
-            Profit: ${metrics?.profit.value}
-            Profit Change: ${metrics?.profit.change}%
-            Current Balance: ${metrics?.balance.value}
-            
-            Generate detailed insights covering:
-            1. Performance Analysis
-            2. Risk Assessment
-            3. Growth Opportunities
-            4. Cost Management
-            5. Cash Flow Health
-            
-            Format as JSON with structure:
-            {
-                "insights": [
-                    {
-                        "title": "Insight title",
-                        "description": "Detailed explanation",
-                        "type": "positive/negative/neutral/warning",
-                        "category": "Performance/Risk/Growth/Cost/Cash Flow",
-                        "impact": "high/medium/low",
-                        "metrics": [
-                            {"label": "Key Metric 1", "value": "Value 1"},
-                            {"label": "Key Metric 2", "value": "Value 2"}
-                        ],
-                        "recommendations": ["Action item 1", "Action item 2"]
-                    }
-                ]
-            }`;
+
+Current Month Revenue: ${financial_metrics.revenue.current_month.total}
+Current Month Expenses: ${financial_metrics.expenses.current_month.total}
+Net Profit: ${financial_metrics.profit.current_month.net_profit}
+Current Balance: ${financial_metrics.cash_flow.current_balance}
+
+Financial Ratios:
+- Current Ratio: ${financial_ratios.current_ratio}
+- Gross Margin: ${financial_ratios.gross_margin}
+- Net Profit Margin: ${financial_ratios.net_profit_margin}
+- Operating Expense Ratio: ${financial_ratios.operating_expense_ratio}
+
+Revenue Forecast:
+${JSON.stringify(forecasts.revenue)}
+
+Expense Forecast:
+${JSON.stringify(forecasts.expenses)}
+
+Generate 4-5 detailed insights covering:
+1. Financial Health Analysis
+2. Growth Trends
+3. Risk Factors
+4. Optimization Opportunities
+5. Cash Flow Management
+
+Format as JSON with structure:
+{
+    "insights": [
+        {
+            "title": "Insight title",
+            "description": "Detailed explanation",
+            "type": "positive/negative/neutral/warning",
+            "category": "Health/Growth/Risk/Optimization/Cash Flow",
+            "impact": "high/medium/low",
+            "metrics": [
+                {"label": "Key Metric", "value": "Value"}
+            ],
+            "recommendations": ["Action item 1", "Action item 2"]
+        }
+    ]
+}`;
 
             const response = await axios.post(`${API_URL}?key=${API_KEY}`, {
                 contents: [{
@@ -230,6 +218,7 @@ const Finance = () => {
         return (
             <div className="loading-spinner">
                 <div className="spinner"></div>
+                <p>Analyzing financial data...</p>
             </div>
         );
     }
@@ -238,7 +227,7 @@ const Finance = () => {
         <div className="finance-dashboard">
             <div className="dashboard-header">
                 <h1>Financial Overview</h1>
-                <p className="header-subtitle">Track, analyze, and optimize your business finances</p>
+                <p className="header-subtitle">Real-time financial analytics for {erpData2finance.company_info.name}</p>
             </div>
 
             {/* Key Metrics */}
@@ -292,7 +281,7 @@ const Finance = () => {
             <div className="charts-grid">
                 <div className="chart-card">
                     <div className="chart-header">
-                        <h3 className="chart-title">Revenue Trend</h3>
+                        <h3 className="chart-title">Revenue Forecast</h3>
                         <div className="chart-actions">
                             <button 
                                 className={`chart-period ${selectedPeriod === 'month' ? 'active' : ''}`}
@@ -317,6 +306,11 @@ const Finance = () => {
                                 plugins: {
                                     legend: {
                                         display: false
+                                    },
+                                    tooltip: {
+                                        callbacks: {
+                                            label: (context) => `Revenue: ₹${context.parsed.y.toLocaleString()}`
+                                        }
                                     }
                                 },
                                 scales: {
@@ -326,6 +320,7 @@ const Finance = () => {
                                             color: 'rgba(0, 0, 0, 0.1)'
                                         },
                                         ticks: {
+                                            callback: (value) => `₹${value.toLocaleString()}`,
                                             color: '#666'
                                         }
                                     },
@@ -357,7 +352,22 @@ const Finance = () => {
                                     legend: {
                                         position: 'right',
                                         labels: {
-                                            color: '#666'
+                                            color: '#666',
+                                            font: {
+                                                size: 12
+                                            }
+                                        }
+                                    },
+                                    tooltip: {
+                                        callbacks: {
+                                            label: (context) => {
+                                                const label = context.label || '';
+                                                const value = context.parsed || 0;
+                                                const percentage = erpData2finance.expense_categories.operational.find(
+                                                    item => item.category === label
+                                                )?.percentage || 0;
+                                                return `${label}: ₹${value.toLocaleString()} (${percentage}%)`;
+                                            }
                                         }
                                     }
                                 }
@@ -380,7 +390,15 @@ const Finance = () => {
                                     legend: {
                                         position: 'top',
                                         labels: {
-                                            color: '#666'
+                                            color: '#666',
+                                            font: {
+                                                size: 12
+                                            }
+                                        }
+                                    },
+                                    tooltip: {
+                                        callbacks: {
+                                            label: (context) => `${context.dataset.label}: ₹${context.parsed.y.toLocaleString()}`
                                         }
                                     }
                                 },
@@ -391,6 +409,7 @@ const Finance = () => {
                                             color: 'rgba(0, 0, 0, 0.1)'
                                         },
                                         ticks: {
+                                            callback: (value) => `₹${value.toLocaleString()}`,
                                             color: '#666'
                                         }
                                     },
@@ -440,15 +459,17 @@ const Finance = () => {
                         <tr>
                             <th>Date</th>
                             <th>Description</th>
+                            <th>Type</th>
                             <th>Amount</th>
+                            <th>Payment Mode</th>
                             <th>Status</th>
                         </tr>
                     </thead>
                     <tbody>
                         {transactions
                             .filter(t => {
-                                if (transactionFilter === 'income') return t.type === 'Income';
-                                if (transactionFilter === 'expense') return t.type === 'Expense';
+                                if (transactionFilter === 'income') return t.amount > 0;
+                                if (transactionFilter === 'expense') return t.amount < 0;
                                 return true;
                             })
                             .slice(0, 10)
@@ -456,12 +477,22 @@ const Finance = () => {
                                 <tr key={transaction.id}>
                                     <td>{new Date(transaction.date).toLocaleDateString()}</td>
                                     <td>{transaction.description}</td>
+                                    <td>
+                                        <span className={`transaction-type ${transaction.type.toLowerCase()}`}>
+                                            {transaction.type}
+                                        </span>
+                                    </td>
                                     <td className={`transaction-amount ${transaction.amount > 0 ? 'amount-positive' : 'amount-negative'}`}>
                                         {transaction.amount > 0 ? '+' : ''}₹{Math.abs(transaction.amount).toLocaleString()}
                                     </td>
                                     <td>
-                                        <span className={`transaction-status status-${transaction.status}`}>
-                                            {transaction.status.charAt(0).toUpperCase() + transaction.status.slice(1)}
+                                        <span className="payment-mode">
+                                            {transaction.payment_mode}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span className={`transaction-status status-${transaction.status.toLowerCase()}`}>
+                                            {transaction.status}
                                         </span>
                                     </td>
                                 </tr>

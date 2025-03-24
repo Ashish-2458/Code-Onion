@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import erpData from '../data/erpData.json';
+import erpData2finance from '../data/erpData2finance.json';
 import './AllBot.css';
 
 const API_KEY = 'AIzaSyC-Mb6fH8gHNMP4iYSb6NBzym60jnD_lrc';
@@ -38,9 +39,61 @@ const AllBot = () => {
     ];
 
     useEffect(() => {
+        addWelcomeMessage(activeFeature);
+        generateQuickActions();
+    }, []);
+
+    useEffect(() => {
         scrollToBottom();
         generateQuickActions();
-    }, [messages, activeFeature]);
+        
+        if (messages.length > 0) {
+            setMessages([]);
+            addWelcomeMessage(activeFeature);
+        }
+    }, [activeFeature]);
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [messages]);
+
+    const addWelcomeMessage = (feature) => {
+        let welcomeMsg = {
+            response_type: 'text',
+            message: `Welcome to the ${getFeatureLabel(feature)}! How can I assist you today?`,
+            suggestions: getDefaultSuggestions(feature),
+            actions: []
+        };
+        
+        addMessage('bot', welcomeMsg);
+        setSuggestions(welcomeMsg.suggestions || []);
+    };
+
+    const getFeatureLabel = (featureId) => {
+        const feature = features.find(f => f.id === featureId);
+        return feature ? feature.label : 'Chat';
+    };
+
+    const getDefaultSuggestions = (feature) => {
+        switch (feature) {
+            case 'sales':
+                return ['Show me sales performance', 'Top customers', 'Sales by product'];
+            case 'inventory':
+                return ['Show low stock items', 'Inventory value', 'Most popular products'];
+            case 'finance':
+                return ['Show financial summary', 'Cash flow analysis', 'Revenue forecast'];
+            case 'hr':
+                return ['Employee list', 'Department breakdown', 'Payroll summary'];
+            case 'reports':
+                return ['Generate sales report', 'Create expense report', 'Monthly summary'];
+            case 'trends':
+                return ['Revenue trends', 'Expense trends', 'Growth analysis'];
+            case 'image':
+                return ['How to use image analysis', 'What can you analyze?', 'Image detection capabilities'];
+            default:
+                return ['Tell me about the ERP system', 'How can you help me?', 'Show system overview'];
+        }
+    };
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -97,60 +150,54 @@ const AllBot = () => {
             reader.onloadend = () => {
                 setSelectedImage(file);
                 setImagePreview(reader.result);
-                analyzeImage(reader.result);
+                addMessage('user', { type: 'text', content: `Uploaded image: ${file.name}` });
+                
+                setSuggestions(['Analyze this image', 'Change analysis mode', 'Upload a different image']);
             };
             reader.readAsDataURL(file);
         }
     };
 
-    const analyzeImage = async (imageData) => {
+    const analyzeImage = async () => {
+        if (!imagePreview) return;
+        
         setLoading(true);
         try {
-            const base64Image = imageData.split(',')[1];
-            
-            const prompt = `Analyze this image based on ${analysisMode} mode. 
-            If it's a product, compare it with our inventory: ${JSON.stringify(erpData.Sales_Inventory.Products)}.
-            If it's a document, extract key information.
-            If it's a quality check, provide detailed assessment.
-            
-            Provide analysis in the following JSON format:
-            {
-                "analysis_type": "product/document/quality/general",
-                "description": "Detailed description",
-                "key_findings": ["Finding 1", "Finding 2"],
-                "recommendations": ["Recommendation 1", "Recommendation 2"],
-                "matches": ["Any matches from our inventory/database"],
-                "confidence_score": "0-100%"
-            }`;
-
-            const response = await axios.post(API_URL, {
-                contents: [{
-                    parts: [
-                        { text: prompt },
-                        { inline_data: { mime_type: "image/jpeg", data: base64Image } }
-                    ]
-                }]
-            }, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${API_KEY}`
-                }
-            });
-
-            const analysis = JSON.parse(response.data.candidates[0].content.parts[0].text);
-            
-            addMessage('bot', {
-                type: 'image_analysis',
-                content: analysis
-            });
+            setTimeout(() => {
+                const mockAnalysis = {
+                    analysis_type: analysisMode,
+                    description: "This appears to be an electronic product image.",
+                    key_findings: [
+                        "Device appears to be in good condition",
+                        "Matches with inventory items",
+                        "Image quality is good for analysis"
+                    ],
+                    recommendations: [
+                        "Consider including this in the product catalog",
+                        "Update product images on website"
+                    ],
+                    matches: [
+                        "Similar to Laptop Model X1 in inventory",
+                        "Matches with Electronics category"
+                    ],
+                    confidence_score: "87%"
+                };
+                
+                addMessage('bot', {
+                    type: 'image_analysis',
+                    ...mockAnalysis
+                });
+                
+                setLoading(false);
+            }, 1500);
         } catch (error) {
             console.error('Error analyzing image:', error);
             addMessage('bot', {
                 type: 'error',
                 content: 'Sorry, I had trouble analyzing that image. Please try again.'
             });
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     const handleQuickAction = async (action) => {
@@ -164,8 +211,16 @@ const AllBot = () => {
 
     const generateResponse = async (userInput) => {
         try {
-            let prompt = '';
+            setLoading(true);
             let contextData = {};
+            let responseData = {};
+
+            if (activeFeature === 'image' && 
+               (userInput.toLowerCase().includes('analyze') || 
+                userInput.toLowerCase().includes('detect'))) {
+                await analyzeImage();
+                return;
+            }
 
             switch (activeFeature) {
                 case 'sales':
@@ -180,10 +235,7 @@ const AllBot = () => {
                     };
                     break;
                 case 'finance':
-                    contextData = {
-                        sales: erpData.Sales_Inventory.Sales_Transactions,
-                        employees: erpData.HR_Payroll.Employees
-                    };
+                    contextData = erpData2finance;
                     break;
                 case 'hr':
                     contextData = {
@@ -191,38 +243,20 @@ const AllBot = () => {
                     };
                     break;
                 default:
-                    contextData = erpData;
+                    contextData = {
+                        company: erpData.Company_Details
+                    };
             }
 
-            prompt = `You are an AI assistant for our ERP system. Current feature: ${activeFeature}.
-            User Query: ${userInput}
-            Context Data: ${JSON.stringify(contextData)}
-            
-            Generate a response in JSON format:
-            {
-                "response_type": "text/chart/table/alert",
-                "message": "Main response message",
-                "data": {}, // Any relevant data for visualization
-                "suggestions": ["Suggestion 1", "Suggestion 2"],
-                "actions": ["Action 1", "Action 2"]
-            }`;
-
-            const response = await axios.post(API_URL, {
-                contents: [{
-                    parts: [{
-                        text: prompt
-                    }]
-                }]
-            }, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${API_KEY}`
-                }
-            });
-
-            const parsedResponse = JSON.parse(response.data.candidates[0].content.parts[0].text);
-            addMessage('bot', parsedResponse);
-            setSuggestions(parsedResponse.suggestions || []);
+            setTimeout(() => {
+                let responseObj = createSimulatedResponse(userInput, activeFeature, contextData);
+                
+                addMessage('bot', responseObj);
+                
+                setSuggestions(responseObj.suggestions || []);
+                
+                setLoading(false);
+            }, 1000);
 
         } catch (error) {
             console.error('Error generating response:', error);
@@ -230,7 +264,177 @@ const AllBot = () => {
                 type: 'error',
                 content: 'I encountered an error. Please try again.'
             });
+            setLoading(false);
         }
+    };
+
+    const createSimulatedResponse = (userInput, feature, contextData) => {
+        const query = userInput.toLowerCase();
+        
+        let response = {
+            response_type: 'text',
+            message: `I'm analyzing your query about "${userInput}" in the ${getFeatureLabel(feature)} module.`,
+            suggestions: getDefaultSuggestions(feature),
+            actions: []
+        };
+        
+        switch (feature) {
+            case 'sales':
+                if (query.includes('top') && query.includes('product')) {
+                    response = {
+                        response_type: 'chart',
+                        message: 'Here are your top selling products based on recent transactions:',
+                        data: {
+                            labels: erpData.Sales_Inventory.Products.slice(0, 5).map(p => p.Product_Name),
+                            values: [45, 32, 18, 14, 8]
+                        },
+                        suggestions: ['Show sales by customer', 'Revenue breakdown', 'Sales forecast'],
+                        actions: ['Download sales report', 'Compare to last month']
+                    };
+                } else if (query.includes('trend')) {
+                    response = {
+                        response_type: 'chart',
+                        message: 'Here is the sales trend analysis for the past months:',
+                        data: {
+                            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
+                            values: [1250000, 1400000, 1934756, 2100000, 2250000]
+                        },
+                        suggestions: ['Forecast next quarter', 'Compare to expenses', 'Show growth rate'],
+                        actions: ['Download trend data', 'Share with team']
+                    };
+                }
+                break;
+                
+            case 'finance':
+                if (query.includes('cash flow') || query.includes('cashflow')) {
+                    response = {
+                        response_type: 'chart',
+                        message: 'Here is your cash flow analysis:',
+                        data: {
+                            current_balance: contextData.financial_metrics.cash_flow.current_balance,
+                            accounts_receivable: contextData.financial_metrics.cash_flow.accounts_receivable,
+                            accounts_payable: contextData.financial_metrics.cash_flow.accounts_payable
+                        },
+                        suggestions: ['Show profit margins', 'Expense breakdown', 'Financial ratios'],
+                        actions: ['Generate cash flow report', 'Show forecast']
+                    };
+                } else if (query.includes('expense') || query.includes('expenses')) {
+                    response = {
+                        response_type: 'chart',
+                        message: 'Here is your expense breakdown:',
+                        data: contextData.expense_categories.operational,
+                        suggestions: ['Show revenue breakdown', 'Budget analysis', 'Cost-cutting opportunities'],
+                        actions: ['Download expense report', 'Compare to budget']
+                    };
+                } else if (query.includes('summary') || query.includes('overview')) {
+                    response = {
+                        response_type: 'table',
+                        message: 'Here is your financial summary:',
+                        data: {
+                            revenue: contextData.financial_metrics.revenue.current_month.total,
+                            expenses: contextData.financial_metrics.expenses.current_month.total,
+                            profit: contextData.financial_metrics.profit.current_month.net_profit,
+                            current_ratio: contextData.financial_ratios.current_ratio,
+                            net_profit_margin: contextData.financial_ratios.net_profit_margin
+                        },
+                        suggestions: ['Show detailed metrics', 'Financial health analysis', 'Compare to last month'],
+                        actions: ['Generate financial report', 'Share with stakeholders']
+                    };
+                }
+                break;
+                
+            case 'hr':
+                if (query.includes('employee') || query.includes('staff')) {
+                    response = {
+                        response_type: 'table',
+                        message: 'Here is your employee information:',
+                        data: contextData.employees.map(emp => ({
+                            name: emp.Name,
+                            department: emp.Department,
+                            designation: emp.Designation,
+                            join_date: emp.Join_Date
+                        })),
+                        suggestions: ['Department breakdown', 'Salary analysis', 'Employee performance'],
+                        actions: ['Download employee list', 'Generate HR report']
+                    };
+                } else if (query.includes('payroll') || query.includes('salary')) {
+                    response = {
+                        response_type: 'chart',
+                        message: 'Here is the payroll distribution by department:',
+                        data: {
+                            labels: ['Management', 'Finance', 'HR', 'IT', 'Sales'],
+                            values: [92800, 101700, 70100, 62200, 54300]
+                        },
+                        suggestions: ['Payroll trends', 'Salary benchmarks', 'Budget allocation'],
+                        actions: ['Download payroll report', 'Compare to industry standards']
+                    };
+                }
+                break;
+                
+            case 'inventory':
+                if (query.includes('low stock') || query.includes('reorder')) {
+                    response = {
+                        response_type: 'table',
+                        message: 'Here are items that need reordering soon:',
+                        data: [
+                            { product: 'Smartphone Model X', stock: 5, reorder_level: 10 },
+                            { product: 'Wireless Earbuds', stock: 8, reorder_level: 15 },
+                            { product: 'USB-C Cables', stock: 12, reorder_level: 20 }
+                        ],
+                        suggestions: ['Generate purchase orders', 'Supplier contacts', 'Stock history'],
+                        actions: ['Create reorder list', 'Send to purchasing']
+                    };
+                } else if (query.includes('value') || query.includes('worth')) {
+                    response = {
+                        response_type: 'chart',
+                        message: 'Here is your current inventory valuation:',
+                        data: {
+                            total_value: 4850000,
+                            breakdown: [
+                                { category: 'Electronics', value: 3250000 },
+                                { category: 'Accessories', value: 980000 },
+                                { category: 'Components', value: 620000 }
+                            ]
+                        },
+                        suggestions: ['Stock turnover analysis', 'High-value items', 'Value trends'],
+                        actions: ['Download valuation report', 'Share with finance']
+                    };
+                }
+                break;
+                
+            case 'reports':
+                response = {
+                    response_type: 'text',
+                    message: 'I can help you generate comprehensive reports. What type of report would you like?',
+                    suggestions: ['Sales report', 'Inventory report', 'Financial report', 'HR report'],
+                    actions: ['Create custom report', 'Schedule recurring reports']
+                };
+                break;
+                
+            case 'trends':
+                response = {
+                    response_type: 'chart',
+                    message: 'Here are the business trends based on your data:',
+                    data: {
+                        revenue_trend: [1550000, 1680000, 1934756, 2100000, 2250000, 2400000],
+                        expense_trend: [1350000, 1560000, 2447600, 1800000, 1900000, 2000000],
+                        profit_trend: [200000, 120000, -512844, 300000, 350000, 400000]
+                    },
+                    suggestions: ['Growth rate analysis', 'Seasonal patterns', 'Market comparison'],
+                    actions: ['Generate trend report', 'Forecast next quarter']
+                };
+                break;
+                
+            default:
+                response = {
+                    response_type: 'text',
+                    message: `I understand you're asking about "${userInput}". How can I provide more specific information?`,
+                    suggestions: ['Show company overview', 'System capabilities', 'Available modules'],
+                    actions: []
+                };
+        }
+        
+        return response;
     };
 
     const handleSubmit = async (e, quickAction = null) => {
@@ -238,12 +442,10 @@ const AllBot = () => {
         const userInput = quickAction || input;
         if (!userInput.trim()) return;
 
-        setLoading(true);
         addMessage('user', { type: 'text', content: userInput });
         setInput('');
 
         await generateResponse(userInput);
-        setLoading(false);
     };
 
     const renderMessage = (message) => {
@@ -264,7 +466,7 @@ const AllBot = () => {
             case 'image_analysis':
                 return (
                     <div className="bot-message analysis-message">
-                        <h4>{message.content.analysis_type} Analysis</h4>
+                        <h4>{message.content.analysis_type.charAt(0).toUpperCase() + message.content.analysis_type.slice(1)} Analysis</h4>
                         <p>{message.content.description}</p>
                         <div className="findings-section">
                             <h5>Key Findings:</h5>
@@ -292,18 +494,58 @@ const AllBot = () => {
             case 'chart':
                 return (
                     <div className="bot-message chart-message">
-                        <div className="chart-container">
-                            {/* Chart visualization would go here */}
+                        <div className="message-content">
                             {message.content.message}
+                        </div>
+                        <div className="chart-container">
+                            <div className="simulated-chart">
+                                {JSON.stringify(message.content.data, null, 2)}
+                            </div>
+                        </div>
+                        {message.content.actions?.length > 0 && (
+                            <div className="message-actions">
+                                {message.content.actions.map((action, idx) => (
+                                    <button 
+                                        key={idx}
+                                        className="action-button"
+                                        onClick={() => handleQuickAction(action)}
+                                    >
+                                        {action}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                        <div className="message-timestamp">
+                            {new Date(message.timestamp).toLocaleTimeString()}
                         </div>
                     </div>
                 );
             case 'table':
                 return (
                     <div className="bot-message table-message">
-                        <div className="table-container">
-                            {/* Table visualization would go here */}
+                        <div className="message-content">
                             {message.content.message}
+                        </div>
+                        <div className="table-container">
+                            <div className="simulated-table">
+                                {JSON.stringify(message.content.data, null, 2)}
+                            </div>
+                        </div>
+                        {message.content.actions?.length > 0 && (
+                            <div className="message-actions">
+                                {message.content.actions.map((action, idx) => (
+                                    <button 
+                                        key={idx}
+                                        className="action-button"
+                                        onClick={() => handleQuickAction(action)}
+                                    >
+                                        {action}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                        <div className="message-timestamp">
+                            {new Date(message.timestamp).toLocaleTimeString()}
                         </div>
                     </div>
                 );
@@ -350,7 +592,7 @@ const AllBot = () => {
                         onClick={() => setActiveFeature(feature.id)}
                     >
                         <span className="feature-icon">{feature.icon}</span>
-                        {feature.label}
+                        <span>{feature.label}</span>
                     </button>
                 ))}
             </div>
@@ -420,6 +662,14 @@ const AllBot = () => {
                         >
                             {imagePreview ? 'Upload Another Image' : 'Upload Image for Analysis'}
                         </button>
+                        {imagePreview && (
+                            <button 
+                                className="upload-button analyze-button"
+                                onClick={analyzeImage}
+                            >
+                                Analyze Image
+                            </button>
+                        )}
                     </div>
                 )}
 

@@ -254,18 +254,18 @@ const Sales = () => {
         label: 'Revenue (₹)',
         data: topProducts.map(product => product.revenue),
         backgroundColor: [
-          'rgba(255, 99, 132, 0.7)',
-          'rgba(54, 162, 235, 0.7)',
-          'rgba(255, 206, 86, 0.7)',
-          'rgba(75, 192, 192, 0.7)',
-          'rgba(153, 102, 255, 0.7)',
+          'rgba(54, 162, 235, 0.7)',   // Blue
+          'rgba(75, 192, 192, 0.7)',   // Teal
+          'rgba(255, 159, 64, 0.7)',   // Orange
+          'rgba(153, 102, 255, 0.7)',  // Purple
+          'rgba(255, 99, 132, 0.7)',   // Pink
         ],
         borderColor: [
-          'rgba(255, 99, 132, 1)',
           'rgba(54, 162, 235, 1)',
-          'rgba(255, 206, 86, 1)',
           'rgba(75, 192, 192, 1)',
+          'rgba(255, 159, 64, 1)',
           'rgba(153, 102, 255, 1)',
+          'rgba(255, 99, 132, 1)',
         ],
         borderWidth: 1,
       },
@@ -283,13 +283,13 @@ const Sales = () => {
           productData.filter(product => product.Stock_Available <= product.Reorder_Level).length,
         ],
         backgroundColor: [
-          'rgba(75, 192, 192, 0.7)',
-          'rgba(255, 206, 86, 0.7)',
-          'rgba(255, 99, 132, 0.7)',
+          'rgba(54, 162, 235, 0.7)',   // Blue
+          'rgba(255, 159, 64, 0.7)',   // Orange
+          'rgba(255, 99, 132, 0.7)',   // Pink
         ],
         borderColor: [
-          'rgba(75, 192, 192, 1)',
-          'rgba(255, 206, 86, 1)',
+          'rgba(54, 162, 235, 1)',
+          'rgba(255, 159, 64, 1)',
           'rgba(255, 99, 132, 1)',
         ],
         borderWidth: 1,
@@ -314,7 +314,7 @@ const Sales = () => {
           ...(forecastData ? forecastData.forecast.map(f => f.predictedSales) : [])
         ],
         borderColor: 'rgba(54, 162, 235, 1)',
-        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+        backgroundColor: 'rgba(54, 162, 235, 0.1)',
         borderWidth: 2,
         fill: true,
         tension: 0.4,
@@ -457,12 +457,16 @@ const Sales = () => {
                                 },
                                 ticks: {
                                   callback: (value) => `₹${value.toLocaleString()}`,
+                                  color: '#333333'
                                 }
                               },
                               x: {
                                 grid: {
                                   display: false,
                                   drawBorder: false,
+                                },
+                                ticks: {
+                                  color: '#333333'
                                 }
                               }
                             }
@@ -493,19 +497,28 @@ const Sales = () => {
                             plugins: {
                               legend: {
                                 position: 'right',
+                                labels: {
+                                  color: '#333333',
+                                  font: {
+                                    size: 12,
+                                    weight: '500'
+                                  },
+                                  padding: 20
+                                }
                               }
                             },
                             cutout: '65%',
+                            backgroundColor: '#ffffff'
                           }}
                         />
                       </div>
                       <div className="chart-legend">
                         <div className="legend-item">
-                          <div className="legend-color" style={{ backgroundColor: 'rgba(75, 192, 192, 0.7)' }}></div>
+                          <div className="legend-color" style={{ backgroundColor: 'rgba(54, 162, 235, 0.7)' }}></div>
                           <Typography variant="body2">In Stock: {inventoryStatusChartData.datasets[0].data[0]} products</Typography>
                         </div>
                         <div className="legend-item">
-                          <div className="legend-color" style={{ backgroundColor: 'rgba(255, 206, 86, 0.7)' }}></div>
+                          <div className="legend-color" style={{ backgroundColor: 'rgba(255, 159, 64, 0.7)' }}></div>
                           <Typography variant="body2">Low Stock: {inventoryStatusChartData.datasets[0].data[1]} products</Typography>
                         </div>
                         <div className="legend-item">
@@ -547,7 +560,12 @@ const Sales = () => {
                                   label: function(context) {
                                     return `₹${context.raw.toLocaleString()}`;
                                   }
-                                }
+                                },
+                                backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                                titleColor: '#333333',
+                                bodyColor: '#333333',
+                                borderColor: 'rgba(0, 0, 0, 0.1)',
+                                borderWidth: 1
                               }
                             },
                             scales: {
@@ -559,15 +577,21 @@ const Sales = () => {
                                 },
                                 ticks: {
                                   callback: (value) => `₹${value.toLocaleString()}`,
+                                  color: '#333333'
                                 }
                               },
                               x: {
                                 grid: {
                                   display: false,
                                   drawBorder: false,
+                                },
+                                ticks: {
+                                  color: '#333333'
                                 }
                               }
-                            }
+                            },
+                            maintainAspectRatio: false,
+                            backgroundColor: '#ffffff'
                           }}
                         />
                       </div>
